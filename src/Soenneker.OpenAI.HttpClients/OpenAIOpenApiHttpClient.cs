@@ -1,0 +1,57 @@
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
+using Soenneker.Dtos.HttpClientOptions;
+using Soenneker.Extensions.Configuration;
+using Soenneker.OpenAI.HttpClients.Abstract;
+using Soenneker.Utils.HttpClientCache.Abstract;
+
+namespace Soenneker.OpenAI.HttpClients;
+
+///<inheritdoc cref="IOpenAIOpenApiHttpClient"/>
+public sealed class OpenAIOpenApiHttpClient : IOpenAIOpenApiHttpClient
+{
+    private readonly IHttpClientCache _httpClientCache;
+    private readonly IConfiguration _config;
+
+    private const string _prodBaseUrl = "https://api.openai.com/v1";
+
+    public OpenAIOpenApiHttpClient(IHttpClientCache httpClientCache, IConfiguration config)
+    {
+        _httpClientCache = httpClientCache;
+        _config = config;
+    }
+
+    public ValueTask<HttpClient> Get(CancellationToken cancellationToken = default)
+    {
+        return _httpClientCache.Get(nameof(OpenAIOpenApiHttpClient), (config: _config, baseUrl: _config["OpenAI:ClientBaseUrl"] ?? _prodBaseUrl), static state =>
+        {
+            var apiKey = state.config.GetValueStrict<string>("OpenAI:ApiKey");
+            string authHeaderName = state.config["OpenAI:AuthHeaderName"] ?? "Bearer {token}";
+            string authHeaderValueTemplate = state.config["OpenAI:AuthHeaderValueTemplate"] ?? "{token}";
+            string authHeaderValue = authHeaderValueTemplate.Replace("{token}", apiKey, StringComparison.Ordinal);
+
+            return new HttpClientOptions
+            {
+                BaseAddress = new Uri(state.baseUrl),
+                DefaultRequestHeaders = new Dictionary<string, string>
+                {
+                    {authHeaderName, authHeaderValue},
+                }
+            };
+        }, cancellationToken);
+    }
+
+    public void Dispose()
+    {
+        _httpClientCache.RemoveSync(nameof(OpenAIOpenApiHttpClient));
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        return _httpClientCache.Remove(nameof(OpenAIOpenApiHttpClient));
+    }
+}
