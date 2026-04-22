@@ -1,20 +1,19 @@
 using Soenneker.OpenAI.HttpClients.Abstract;
-using Soenneker.Tests.FixturedUnit;
-using Xunit;
+using Soenneker.Tests.HostedUnit;
 
 namespace Soenneker.OpenAI.HttpClients.Tests;
 
-[Collection("Collection")]
-public sealed class OpenAIOpenApiHttpClientTests : FixturedUnitTest
+[ClassDataSource<Host>(Shared = SharedType.PerTestSession)]
+public sealed class OpenAIOpenApiHttpClientTests : HostedUnitTest
 {
     private readonly IOpenAIOpenApiHttpClient _httpclient;
 
-    public OpenAIOpenApiHttpClientTests(Fixture fixture, ITestOutputHelper output) : base(fixture, output)
+    public OpenAIOpenApiHttpClientTests(Host host) : base(host)
     {
         _httpclient = Resolve<IOpenAIOpenApiHttpClient>(true);
     }
 
-    [Fact]
+    [Test]
     public void Default()
     {
 
