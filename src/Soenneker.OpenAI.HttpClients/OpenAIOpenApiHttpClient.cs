@@ -30,8 +30,8 @@ public sealed class OpenAIOpenApiHttpClient : IOpenAIOpenApiHttpClient
         return _httpClientCache.Get(nameof(OpenAIOpenApiHttpClient), (config: _config, baseUrl: _config["OpenAI:ClientBaseUrl"] ?? _prodBaseUrl), static state =>
         {
             var apiKey = state.config.GetValueStrict<string>("OpenAI:ApiKey");
-            string authHeaderName = state.config["OpenAI:AuthHeaderName"] ?? "Bearer {token}";
-            string authHeaderValueTemplate = state.config["OpenAI:AuthHeaderValueTemplate"] ?? "{token}";
+            string authHeaderName = state.config["OpenAI:AuthHeaderName"] ?? "Authorization";
+            string authHeaderValueTemplate = state.config["OpenAI:AuthHeaderValueTemplate"] ?? "Bearer {token}";
             string authHeaderValue = authHeaderValueTemplate.Replace("{token}", apiKey, StringComparison.Ordinal);
 
             return new HttpClientOptions
