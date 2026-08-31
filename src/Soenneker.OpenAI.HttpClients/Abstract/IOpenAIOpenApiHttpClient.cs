@@ -6,14 +6,14 @@ using System.Threading;
 namespace Soenneker.OpenAI.HttpClients.Abstract;
 
 /// <summary>
-/// A .NET thread-safe singleton HttpClient for 
+/// Provides a cached, authenticated HTTP client for the OpenAI API.
 /// </summary>
-public interface IOpenAIOpenApiHttpClient: IDisposable, IAsyncDisposable
+public interface IOpenAIOpenApiHttpClient : IDisposable, IAsyncDisposable
 {
     /// <summary>
-    /// Gets the value.
+    /// Gets the configured OpenAI HTTP client.
     /// </summary>
     /// <param name="cancellationToken">The cancellation token.</param>
-    /// <returns>A task containing the result of the operation.</returns>
+    /// <returns>The cached client.</returns>
     ValueTask<HttpClient> Get(CancellationToken cancellationToken = default);
 }

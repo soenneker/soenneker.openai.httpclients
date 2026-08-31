@@ -11,11 +11,11 @@ using Soenneker.Utils.HttpClientCache.Abstract;
 
 namespace Soenneker.OpenAI.HttpClients;
 
-///<inheritdoc cref="IOpenAIOpenApiHttpClient"/>
 public sealed class OpenAIOpenApiHttpClient : IOpenAIOpenApiHttpClient
 {
     private readonly IHttpClientCache _httpClientCache;
     private readonly IConfiguration _config;
+    private readonly string _clientId = $"{nameof(OpenAIOpenApiHttpClient)}:{Guid.NewGuid():N}";
 
     private const string _prodBaseUrl = "https://api.openai.com/v1";
 
@@ -27,7 +27,7 @@ public sealed class OpenAIOpenApiHttpClient : IOpenAIOpenApiHttpClient
 
     public ValueTask<HttpClient> Get(CancellationToken cancellationToken = default)
     {
-        return _httpClientCache.Get(nameof(OpenAIOpenApiHttpClient), (config: _config, baseUrl: _config["OpenAI:ClientBaseUrl"] ?? _prodBaseUrl), static state =>
+        return _httpClientCache.Get(_clientId, (config: _config, baseUrl: _config["OpenAI:ClientBaseUrl"] ?? _prodBaseUrl), static state =>
         {
             var apiKey = state.config.GetValueStrict<string>("OpenAI:ApiKey");
             string authHeaderName = state.config["OpenAI:AuthHeaderName"] ?? "Authorization";
@@ -45,20 +45,13 @@ public sealed class OpenAIOpenApiHttpClient : IOpenAIOpenApiHttpClient
         }, cancellationToken);
     }
 
-    /// <summary>
-    /// Releases resources used by the current instance.
-    /// </summary>
     public void Dispose()
     {
-        _httpClientCache.RemoveSync(nameof(OpenAIOpenApiHttpClient));
+        _httpClientCache.RemoveSync(_clientId);
     }
 
-    /// <summary>
-    /// Asynchronously releases resources used by the current instance.
-    /// </summary>
-    /// <returns>A task that represents the asynchronous operation.</returns>
     public ValueTask DisposeAsync()
     {
-        return _httpClientCache.Remove(nameof(OpenAIOpenApiHttpClient));
+        return _httpClientCache.Remove(_clientId);
     }
 }
