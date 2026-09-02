@@ -26,7 +26,7 @@ public sealed class OpenAIOpenApiHttpClientTests : HostedUnitTest
     }
 
     [Test]
-    public async ValueTask Get_ShouldUseBearerAuthorizationByDefault()
+    public async ValueTask Get_ShouldUseBearerAuthorizationByDefault(CancellationToken cancellationToken)
     {
         IConfiguration configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
@@ -38,7 +38,7 @@ public sealed class OpenAIOpenApiHttpClientTests : HostedUnitTest
         using var httpClientCache = new HttpClientCache();
         await using var httpClientUtil = new OpenAIOpenApiHttpClient(httpClientCache, configuration);
 
-        System.Net.Http.HttpClient client = await httpClientUtil.Get(CancellationToken.None);
+        System.Net.Http.HttpClient client = await httpClientUtil.Get(cancellationToken);
 
         client.DefaultRequestHeaders.TryGetValues("Authorization", out IEnumerable<string>? values);
 
