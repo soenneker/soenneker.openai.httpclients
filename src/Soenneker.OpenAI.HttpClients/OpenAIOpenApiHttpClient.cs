@@ -11,6 +11,7 @@ using Soenneker.Utils.HttpClientCache.Abstract;
 
 namespace Soenneker.OpenAI.HttpClients;
 
+/// <inheritdoc cref="IOpenAIOpenApiHttpClient" />
 public sealed class OpenAIOpenApiHttpClient : IOpenAIOpenApiHttpClient
 {
     private readonly IHttpClientCache _httpClientCache;
